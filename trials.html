@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Reverse Rate Calculator — In-Hand to Gross</title>
+<style>
+  :root{
+    --bg:#eef3f7;--card:#ffffff;--muted:#6b7280;--accent:#234e70;--soft:#f5f9fc;
+    --radius:14px;--shadow:0 8px 20px rgba(0,0,0,0.06);
+  }
+  *{box-sizing:border-box;font-family:Inter,Segoe UI,system-ui,Roboto,"Helvetica Neue",Arial;}
+  body{margin:0;padding:20px;background:linear-gradient(180deg,var(--bg),#dce7f0);color:#12202b;min-height:100vh;}
+  .wrap{max-width:1200px;margin:0 auto;padding:22px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);}
+  h1{font-size:22px;margin:0 0 10px;color:var(--accent)}
+  p.lead{margin:6px 0 20px;color:var(--muted);font-size:14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:600}
+  input[type="number"], input[type="date"]{
+    width:100%;padding:11px 12px;border:1px solid #dde5ec;border-radius:12px;background:#fff;
+    font-size:15px;transition:all .2s;
+  }
+  input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(35,78,112,0.12)}
+  .controls{display:flex;gap:12px;align-items:center;margin-top:10px}
+  button{
+    flex:1;background:linear-gradient(180deg,#3f6a7e,#2d4d63);color:#fff;padding:12px;
+    border-radius:12px;border:0;font-weight:700;cursor:pointer;font-size:15px;
+    box-shadow:0 6px 14px rgba(53,88,107,0.15);transition:all .2s;
+  }
+  button:hover{background:linear-gradient(180deg,#335a6d,#243f50);}
+  button.secondary{background:#fff;color:var(--accent);border:1px solid #ccd9e2;box-shadow:none;}
+  button.secondary:hover{background:#f0f5f9;}
+  .output{margin-top:20px;padding:16px;border-radius:14px;background:var(--soft);box-shadow:inset 0 1px 0 rgba(255,255,255,0.7)}
+  table{width:100%;border-collapse:collapse;margin-top:14px;font-size:14px}
+  th,td{padding:10px 8px;text-align:left;border-bottom:1px solid rgba(10,20,30,0.05)}
+  th{font-weight:700;color:#34495a}
+  .right{text-align:right}
+  .small{font-size:13px;color:var(--muted)}
+  .highlight{background-color:#f0f7ff;font-weight:600}
+  .info-box {background:#e8f4ff;border-left:4px solid var(--accent);padding:12px 16px;margin:16px 0;border-radius:0 8px 8px 0;}
+  .formula {background:#f9f9f9;padding:12px;border-radius:8px;margin:12px 0;font-family:monospace;font-size:13px;}
+  .example {background:#f0f9f0;border-left:4px solid #2e7d32;padding:12px 16px;margin:16px 0;border-radius:0 8px 8px 0;}
+  .percentage-grid {display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Reverse Rate Calculator — In-Hand to Gross</h1>
+  <p class="lead">Enter the desired Net After Deduction (In-Hand) amount for each room type to calculate the required Gross Rate.</p>
+ 
+
+  <div class="grid">
+    <div><label>Double Bed Non AC (In-Hand)</label><input id="inhand_db_nac" type="number" step="0.01" placeholder="Desired in-hand amount"></div>
+    <div><label>Double Bed AC (In-Hand)</label><input id="inhand_db_ac" type="number" step="0.01" placeholder="Desired in-hand amount"></div>
+    <div><label>Triple Bed Non AC (In-Hand)</label><input id="inhand_tb_nac" type="number" step="0.01" placeholder="Desired in-hand amount"></div>
+    <div><label>Triple Bed AC (In-Hand)</label><input id="inhand_tb_ac" type="number" step="0.01" placeholder="Desired in-hand amount"></div>
+    <div><label>Four Bed Non AC (In-Hand)</label><input id="inhand_fb_nac" type="number" step="0.01" placeholder="Desired in-hand amount"></div>
+    <div><label>Four Bed AC (In-Hand)</label><input id="inhand_fb_ac" type="number" step="0.01" placeholder="Desired in-hand amount"></div>
+    <div><label>Extra Mattress (In-Hand)</label><input id="inhand_extra" type="number" step="0.01" placeholder="Desired in-hand amount"></div>
+  </div>
+
+  <div class="percentage-grid">
+    <div><label>Discount %</label><input id="discountPct" type="number" step="0.01" value="5"/></div>
+    <div><label>Commission %</label><input id="commissionPct" type="number" step="0.01" value="20"/></div>
+    <div><label>Commission GST %</label><input id="commissionGstPct" type="number" step="0.01" value="18"/></div>
+    <div><label>Service GST %</label><input id="serviceGstPct" type="number" step="0.01" value="5"/></div>
+    <div><label>TCS %</label><input id="tcsPct" type="number" step="0.01" value="0.5"/></div>
+    <div><label>TDS %</label><input id="tdsPct" type="number" step="0.01" value="0.1"/></div>
+  </div>
+
+ 
+  <div class="controls">
+    <button id="calcBtn">Calculate Required Gross Rates</button>
+    <button id="resetBtn" class="secondary">Reset</button>
+  </div>
+
+  <div class="output" id="output">
+    <div class="small">Enter your desired In-Hand amounts and click "Calculate Required Gross Rates" to see what Gross Rates you need to charge.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const toNum = v => (v===''||v==null)?0:parseFloat(v);
+  function fmt(n){return Number.isFinite(n)?n.toFixed(2):'-'}
+
+  // Function to calculate from Gross to Net (for verification)
+  function calculateNetFromGross(grossRate, discountPct, commissionPct, commissionGstPct, serviceGstPct, tcsPct, tdsPct) {
+    if(grossRate<=0) return null;
+    
+    // Step 1: Apply discount
+    const Discount = grossRate * (discountPct / 100);
+    const DiscountedRate = grossRate - Discount;
+    
+    // Step 2: Calculate GST on discounted rate
+    const GstOnDiscountedRate = DiscountedRate * (serviceGstPct / 100);
+    
+    // Step 3: Total we receive
+    const TotalWeReceive = DiscountedRate + GstOnDiscountedRate;
+    
+    // Step 4: Calculate commission and GST on commission
+    const Commission = DiscountedRate * (commissionPct / 100);
+    const GstOnCommission = Commission * (commissionGstPct / 100);
+    
+    // Step 5: Calculate TCS and TDS
+    const TCS = DiscountedRate * (tcsPct / 100);
+    const TDS = DiscountedRate * (tdsPct / 100);
+    
+    // Step 6: Calculate net after deduction (in-hand)
+    const NetAfterDeduction = TotalWeReceive - Commission - GstOnCommission - TCS - TDS - GstOnDiscountedRate;
+    
+    return {
+      Gross: grossRate,
+      Discount,
+      DiscountedRate,
+      GstOnDiscountedRate,
+      TotalWeReceive,
+      Commission,
+      GstOnCommission,
+      TCS,
+      TDS,
+      NetAfterDeduction
+    };
+  }
+
+  // Function to calculate Gross from desired Net After Deduction
+  function calculateGrossFromNet(netAfterDeduction, discountPct, commissionPct, commissionGstPct, serviceGstPct, tcsPct, tdsPct) {
+    if(netAfterDeduction<=0) return null;
+    
+    // Convert percentages to decimals
+    const d = discountPct / 100;
+    const c = commissionPct / 100;
+    const cg = commissionGstPct / 100;
+    const sg = serviceGstPct / 100;
+    const tcs = tcsPct / 100;
+    const tds = tdsPct / 100;
+    
+    // We need to reverse the calculation:
+    // Net After Deduction = (Gross*(1-d) + Gross*(1-d)*sg) - Gross*(1-d)*c - Gross*(1-d)*c*cg - Gross*(1-d)*tcs - Gross*(1-d)*tds - Gross*(1-d)*sg
+    // Simplify: Net After Deduction = Gross*(1-d)*[1 + sg - c - c*cg - tcs - tds - sg]
+    // Further simplify: Net After Deduction = Gross*(1-d)*[1 - c - c*cg - tcs - tds]
+    
+    const factor = (1 - d) * (1 - c - c*cg - tcs - tds);
+    const Gross = netAfterDeduction / factor;
+    
+    // Now verify with forward calculation
+    const verification = calculateNetFromGross(Gross, discountPct, commissionPct, commissionGstPct, serviceGstPct, tcsPct, tdsPct);
+    
+    return {
+      ...verification,
+      TargetNetAfterDeduction: netAfterDeduction
+    };
+  }
+
+  function render(results){
+    if(results.length === 0 || results.every(r => !r.data)) {
+      $('output').innerHTML='<div class="small">Enter your desired In-Hand amounts and click "Calculate Required Gross Rates" to see what Gross Rates you need to charge.</div>';
+      return;
+    }
+    
+    let html = '<table><thead><tr><th>Room Type</th><th class="right">Target In-Hand</th><th class="right">Required Gross</th><th class="right">Discounted Rate</th><th class="right">GST (' + $('serviceGstPct').value + '%)</th><th class="right">Total We Receive</th><th class="right">Commission</th><th class="right">GST on Commission</th><th class="right">TCS</th><th class="right">TDS</th><th class="right">Actual In-Hand</th></tr></thead><tbody>';
+    
+    for(const r of results){
+      if(!r.data) continue;
+      
+      // Check if calculated in-hand matches target (with small tolerance for floating point)
+      const inHandMatch = Math.abs(r.data.NetAfterDeduction - r.data.TargetNetAfterDeduction) < 0.01;
+      const inHandClass = inHandMatch ? '' : 'highlight';
+      
+      html += `<tr>
+        <td>${r.name}</td>
+        <td class="right highlight">₹${fmt(r.data.TargetNetAfterDeduction)}</td>
+        <td class="right highlight">₹${fmt(r.data.Gross)}</td>
+        <td class="right">₹${fmt(r.data.DiscountedRate)}</td>
+        <td class="right">₹${fmt(r.data.GstOnDiscountedRate)}</td>
+        <td class="right">₹${fmt(r.data.TotalWeReceive)}</td>
+        <td class="right">₹${fmt(r.data.Commission)}</td>
+        <td class="right">₹${fmt(r.data.GstOnCommission)}</td>
+        <td class="right">₹${fmt(r.data.TCS)}</td>
+        <td class="right">₹${fmt(r.data.TDS)}</td>
+        <td class="right ${inHandClass}">₹${fmt(r.data.NetAfterDeduction)}</td>
+      </tr>`;
+    }
+    html += '</tbody></table>';
+    $('output').innerHTML = html;
+  }
+
+  $('calcBtn').addEventListener('click', e => {
+    e.preventDefault();
+    const discountPct = toNum($('discountPct').value);
+    const commissionPct = toNum($('commissionPct').value);
+    const commissionGstPct = toNum($('commissionGstPct').value);
+    const serviceGstPct = toNum($('serviceGstPct').value);
+    const tcsPct = toNum($('tcsPct').value);
+    const tdsPct = toNum($('tdsPct').value);
+
+    const rooms = [
+      {id:'inhand_db_nac', name:'Double Bed Non AC'},
+      {id:'inhand_db_ac', name:'Double Bed AC'},
+      {id:'inhand_tb_nac', name:'Triple Bed Non AC'},
+      {id:'inhand_tb_ac', name:'Triple Bed AC'},
+      {id:'inhand_fb_nac', name:'Four Bed Non AC'},
+      {id:'inhand_fb_ac', name:'Four Bed AC'},
+      {id:'inhand_extra', name:'Extra Mattress'}
+    ];
+
+    const results = rooms.map(r => ({
+      name: r.name,
+      data: calculateGrossFromNet(toNum($(r.id).value), discountPct, commissionPct, commissionGstPct, serviceGstPct, tcsPct, tdsPct)
+    }));
+    
+    render(results);
+  });
+
+  $('resetBtn').addEventListener('click', e => {
+    e.preventDefault();
+    ['inhand_db_nac','inhand_db_ac','inhand_tb_nac','inhand_tb_ac','inhand_fb_nac','inhand_fb_ac','inhand_extra'].forEach(id => $(id).value = '');
+    $('discountPct').value = 5;
+    $('commissionPct').value = 20;
+    $('commissionGstPct').value = 18;
+    $('serviceGstPct').value = 5;
+    $('tcsPct').value = 0.5;
+    $('tdsPct').value = 0.1;
+    $('output').innerHTML = '<div class="small">Enter your desired In-Hand amounts and click "Calculate Required Gross Rates" to see what Gross Rates you need to charge.</div>';
+  });
+  
+  // Add example calculation
+  document.addEventListener('DOMContentLoaded', function() {
+    $('inhand_db_nac').value = 1000;
+  });
+})();
+</script>
+</body>
+</html>
