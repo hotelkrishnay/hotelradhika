@@ -3,69 +3,140 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GST Calculator</title>
+  <title>GST Calculator (SGST/CGST)</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f0f4f8;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f0f4f8, #c8d9e8);
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
+      margin: 0;
     }
 
     .container {
-      background: #fff;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      background: #ffffff;
+      padding: 35px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
       text-align: center;
-      max-width: 350px;
-      width: 100%;
+      max-width: 400px;
+      width: 90%;
+      border-top: 5px solid #007bff;
     }
 
     h2 {
-      margin-bottom: 20px;
-      color: #333;
+      margin-bottom: 25px;
+      color: #007bff;
+      font-weight: 600;
+    }
+
+    .input-group {
+      margin-bottom: 18px;
+      text-align: left;
+    }
+
+    .input-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: #555;
     }
 
     input[type="number"] {
-      padding: 10px;
+      padding: 12px;
       width: 100%;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      margin-bottom: 20px;
+      box-sizing: border-box;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    input[type="number"]:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
     }
 
     button {
-      padding: 10px 20px;
-      background: #007bff;
+      padding: 12px 25px;
+      background: #28a745; /* Success Green */
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
       cursor: pointer;
+      font-size: 17px;
+      font-weight: 600;
+      width: 100%;
+      transition: background 0.3s, transform 0.1s;
+      margin-top: 10px;
     }
 
     button:hover {
-      background: #0056b3;
+      background: #218838;
+      transform: translateY(-1px);
     }
 
     .result {
-      margin-top: 20px;
-      font-size: 16px;
-      color: #333;
+      margin-top: 30px;
+      border-top: 2px solid #eee;
+      padding-top: 15px;
+      text-align: left;
     }
+
+    .result-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        font-size: 17px;
+        border-bottom: 1px dashed #eee;
+    }
+
+    .result-item:last-child {
+        border-bottom: none;
+    }
+
+    .result-item.highlight {
+        font-weight: bold;
+        font-size: 18px;
+        color: #007bff;
+        background-color: #f7f9fc;
+        padding: 10px 5px;
+        border-radius: 5px;
+        margin-top: 10px;
+    }
+
+    .result-item span:first-child {
+        color: #333;
+    }
+
+    .result-item span:last-child {
+        color: #000;
+    }
+
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>GST 5% Calculator</h2>
-Enter Total Amount
-    <input type="number" id="totalAmount" placeholder="Enter Total Amount (Incl. GST)" value="1344" />
-Enter Number Of Days
-    <input type="number" id="days" min="1" placeholder="Enter Number of Days" value="2" />
-Enter Number Of Rooms
-    <input type="number" id="rooms" min="1" placeholder="Enter Number of Rooms" value="1" />
+    <h2>GST 5% Calculator (SGST/CGST)</h2>
+
+    <div class="input-group">
+        <label for="totalAmount">Total Amount (Incl. GST)</label>
+        <input type="number" id="totalAmount" placeholder="Enter Total Amount" value="1344" />
+    </div>
+
+    <div class="input-group">
+        <label for="days">Number Of Days</label>
+        <input type="number" id="days" min="1" placeholder="Enter Number of Days" value="2" />
+    </div>
+
+    <div class="input-group">
+        <label for="rooms">Number Of Rooms</label>
+        <input type="number" id="rooms" min="1" placeholder="Enter Number of Rooms" value="1" />
+    </div>
+
     <button onclick="calculateGST()">Calculate</button>
     <div class="result" id="output"></div>
   </div>
@@ -75,26 +146,34 @@ Enter Number Of Rooms
       const total = parseFloat(document.getElementById("totalAmount").value);
       const days = parseInt(document.getElementById("days").value);
       const rooms = parseInt(document.getElementById("rooms").value);
-      const gstRate = 5; // 5%
+      const totalGSTRate = 5; // 5%
+      const halfGSTRate = totalGSTRate / 2; // 2.5% for CGST and SGST
 
       if (!total || total <= 0 || !days || days <= 0 || !rooms || rooms <= 0) {
-        document.getElementById("output").innerHTML = "Please enter valid values for amount, days, and rooms.";
+        document.getElementById("output").innerHTML = '<p style="color: red; text-align: center;">⚠️ Please enter valid, positive values for amount, days, and rooms.</p>';
         return;
       }
 
       // Calculate GST
-      const baseAmount = total / (1 + gstRate / 100);
-      const gstAmount = total - baseAmount;
+      const baseAmount = total / (1 + totalGSTRate / 100);
+      const totalGSTAmount = total - baseAmount;
+      const sgstAmount = totalGSTAmount / 2;
+      const cgstAmount = totalGSTAmount / 2;
       
       // Calculate per day and per room amount
       const perDayRoomAmount = baseAmount / (days * rooms);
 
       document.getElementById("output").innerHTML =
-        `Base Amount (Excl. GST): ₹${baseAmount.toFixed(2)}<br>` +
-        `GST (5%): ₹${gstAmount.toFixed(2)}<br>` +
-        `Total Amount: ₹${total.toFixed(2)}<br>` +
-        `Amount per Day per Room: ₹${perDayRoomAmount.toFixed(2)}`;
+        '<div class="result-item"><span>Total Amount (Incl. GST)</span><span>₹' + total.toFixed(2) + '</span></div>' +
+        '<div class="result-item"><span>Base Amount (Excl. GST)</span><span>₹' + baseAmount.toFixed(2) + '</span></div>' +
+        '<div class="result-item"><span>Total GST (' + totalGSTRate + '%)</span><span>₹' + totalGSTAmount.toFixed(2) + '</span></div>' +
+        '<div class="result-item" style="color: #28a745;"><span>&nbsp;&nbsp;&nbsp;CGST (' + halfGSTRate.toFixed(1) + '%)</span><span>₹' + cgstAmount.toFixed(2) + '</span></div>' +
+        '<div class="result-item" style="color: #28a745;"><span>&nbsp;&nbsp;&nbsp;SGST (' + halfGSTRate.toFixed(1) + '%)</span><span>₹' + sgstAmount.toFixed(2) + '</span></div>' +
+        '<div class="result-item highlight"><span>Amount per Day per Room</span><span>₹' + perDayRoomAmount.toFixed(2) + '</span></div>';
     }
+
+    // Run calculation on load for default values
+    document.addEventListener('DOMContentLoaded', calculateGST);
   </script>
 </body>
 </html>
