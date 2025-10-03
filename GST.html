@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GST Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 350px;
+      width: 100%;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    input[type="number"] {
+      padding: 10px;
+      width: 100%;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .result {
+      margin-top: 20px;
+      font-size: 16px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>GST 5% Calculator</h2>
+Enter Total Amount
+    <input type="number" id="totalAmount" placeholder="Enter Total Amount (Incl. GST)" value="1344" />
+Enter Number Of Days
+    <input type="number" id="days" min="1" placeholder="Enter Number of Days" value="2" />
+Enter Number Of Rooms
+    <input type="number" id="rooms" min="1" placeholder="Enter Number of Rooms" value="1" />
+    <button onclick="calculateGST()">Calculate</button>
+    <div class="result" id="output"></div>
+  </div>
+
+  <script>
+    function calculateGST() {
+      const total = parseFloat(document.getElementById("totalAmount").value);
+      const days = parseInt(document.getElementById("days").value);
+      const rooms = parseInt(document.getElementById("rooms").value);
+      const gstRate = 5; // 5%
+
+      if (!total || total <= 0 || !days || days <= 0 || !rooms || rooms <= 0) {
+        document.getElementById("output").innerHTML = "Please enter valid values for amount, days, and rooms.";
+        return;
+      }
+
+      // Calculate GST
+      const baseAmount = total / (1 + gstRate / 100);
+      const gstAmount = total - baseAmount;
+      
+      // Calculate per day and per room amount
+      const perDayRoomAmount = baseAmount / (days * rooms);
+
+      document.getElementById("output").innerHTML =
+        `Base Amount (Excl. GST): ₹${baseAmount.toFixed(2)}<br>` +
+        `GST (5%): ₹${gstAmount.toFixed(2)}<br>` +
+        `Total Amount: ₹${total.toFixed(2)}<br>` +
+        `Amount per Day per Room: ₹${perDayRoomAmount.toFixed(2)}`;
+    }
+  </script>
+</body>
+</html>
