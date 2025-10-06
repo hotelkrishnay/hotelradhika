@@ -1,235 +1,232 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Reverse Rate Calculator — In-Hand to Gross</title>
-<style>
-  :root{
-    --bg:#eef3f7;--card:#ffffff;--muted:#6b7280;--accent:#234e70;--soft:#f5f9fc;
-    --radius:14px;--shadow:0 8px 20px rgba(0,0,0,0.06);
-  }
-  *{box-sizing:border-box;font-family:Inter,Segoe UI,system-ui,Roboto,"Helvetica Neue",Arial;}
-  body{margin:0;padding:20px;background:linear-gradient(180deg,var(--bg),#dce7f0);color:#12202b;min-height:100vh;}
-  .wrap{max-width:1200px;margin:0 auto;padding:22px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);}
-  h1{font-size:22px;margin:0 0 10px;color:var(--accent)}
-  p.lead{margin:6px 0 20px;color:var(--muted);font-size:14px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
-  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:600}
-  input[type="number"], input[type="date"]{
-    width:100%;padding:11px 12px;border:1px solid #dde5ec;border-radius:12px;background:#fff;
-    font-size:15px;transition:all .2s;
-  }
-  input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(35,78,112,0.12)}
-  .controls{display:flex;gap:12px;align-items:center;margin-top:10px}
-  button{
-    flex:1;background:linear-gradient(180deg,#3f6a7e,#2d4d63);color:#fff;padding:12px;
-    border-radius:12px;border:0;font-weight:700;cursor:pointer;font-size:15px;
-    box-shadow:0 6px 14px rgba(53,88,107,0.15);transition:all .2s;
-  }
-  button:hover{background:linear-gradient(180deg,#335a6d,#243f50);}
-  button.secondary{background:#fff;color:var(--accent);border:1px solid #ccd9e2;box-shadow:none;}
-  button.secondary:hover{background:#f0f5f9;}
-  .output{margin-top:20px;padding:16px;border-radius:14px;background:var(--soft);box-shadow:inset 0 1px 0 rgba(255,255,255,0.7)}
-  table{width:100%;border-collapse:collapse;margin-top:14px;font-size:14px}
-  th,td{padding:10px 8px;text-align:left;border-bottom:1px solid rgba(10,20,30,0.05)}
-  th{font-weight:700;color:#34495a}
-  .right{text-align:right}
-  .small{font-size:13px;color:var(--muted)}
-  .highlight{background-color:#f0f7ff;font-weight:600}
-  .info-box {background:#e8f4ff;border-left:4px solid var(--accent);padding:12px 16px;margin:16px 0;border-radius:0 8px 8px 0;}
-  .formula {background:#f9f9f9;padding:12px;border-radius:8px;margin:12px 0;font-family:monospace;font-size:13px;}
-  .example {background:#f0f9f0;border-left:4px solid #2e7d32;padding:12px 16px;margin:16px 0;border-radius:0 8px 8px 0;}
-  .percentage-grid {display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 10px;}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>OTA Reverse Gross Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+  </style>
 </head>
-<body>
-<div class="wrap">
-  <h1>Reverse Rate Calculator — In-Hand to Gross</h1>
-  <p class="lead">Enter the desired Net After Deduction (In-Hand) amount for each room type to calculate the required Gross Rate.</p>
- 
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-xl bg-white rounded-2xl shadow-lg overflow-hidden">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white p-5 text-center">
+      <h1 class="text-xl sm:text-2xl font-extrabold">Reverse Gross Calculator (Net → Gross)</h1>
+      <p class="text-sm opacity-90 mt-1">Enter net in-hand and get the required base (gross) rate — step-by-step breakdown shown below.</p>
+    </div>
 
-  <div class="grid">
-    <div><label>Double Bed Non AC (In-Hand)</label><input id="inhand_db_nac" type="number" step="0.01" placeholder="Desired in-hand amount"></div>
-    <div><label>Double Bed AC (In-Hand)</label><input id="inhand_db_ac" type="number" step="0.01" placeholder="Desired in-hand amount"></div>
-    <div><label>Triple Bed Non AC (In-Hand)</label><input id="inhand_tb_nac" type="number" step="0.01" placeholder="Desired in-hand amount"></div>
-    <div><label>Triple Bed AC (In-Hand)</label><input id="inhand_tb_ac" type="number" step="0.01" placeholder="Desired in-hand amount"></div>
-    <div><label>Four Bed Non AC (In-Hand)</label><input id="inhand_fb_nac" type="number" step="0.01" placeholder="Desired in-hand amount"></div>
-    <div><label>Four Bed AC (In-Hand)</label><input id="inhand_fb_ac" type="number" step="0.01" placeholder="Desired in-hand amount"></div>
-    <div><label>Extra Mattress (In-Hand)</label><input id="inhand_extra" type="number" step="0.01" placeholder="Desired in-hand amount"></div>
+    <div class="p-6">
+      <!-- OTA Selector -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Select OTA</label>
+        <select id="ota" onchange="setOTARules()" class="w-full px-3 py-2 border rounded-lg">
+          <option value="">-- Choose OTA --</option>
+          <option value="cleartrip">Cleartrip (20% + GST on comm, TCS 0.5, TDS 0.1)</option>
+          <option value="gommt">GoMMT (20% + GST on comm, TCS 0.5, TDS 0.1)</option>
+          <option value="yatra">Yatra (20% + GST on comm, TCS 0.5, TDS 0.1)</option>
+          <option value="expedia">Expedia (18%, TCS 0.5, TDS 0.1)</option>
+          <option value="agoda">Agoda (18%, TCS 0.5, TDS 0.1)</option>
+          <option value="booking">Booking.com (15%, no TCS/TDS)</option>
+        </select>
+      </div>
+
+      <!-- Net In-Hand -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Net In-Hand (₹)</label>
+        <input id="netRate" type="number" step="any" placeholder="Enter net in-hand (e.g. 1000)" class="w-full px-3 py-2 border rounded-lg" />
+      </div>
+
+      <!-- Discount editable -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Discount (%) — editable</label>
+        <input id="discountInput" type="number" step="0.01" class="w-full px-3 py-2 border rounded-lg" />
+      </div>
+
+      <!-- Rules display -->
+      <div id="rulesDisplay" class="mb-4 text-sm text-gray-700"></div>
+
+      <!-- Calculate -->
+      <div class="mb-4">
+        <button onclick="calculateGrossRate()" class="w-full bg-purple-600 text-white py-2 rounded-lg font-semibold hover:bg-purple-700 transition">
+          Calculate Gross Rate
+        </button>
+      </div>
+
+      <!-- Result breakdown -->
+      <div id="resultWrap" class="hidden bg-gray-50 border rounded-lg p-4">
+        <h2 class="text-sm font-semibold text-gray-800 mb-3">Calculation Breakdown</h2>
+
+        <div class="grid grid-cols-2 gap-2 text-sm text-gray-700">
+          <div>Base Rate</div><div id="out_baseRate" class="font-medium"></div>
+
+          <div>Minus - Discount (%)</div><div id="out_discountPct"></div>
+          <div>Minus - Discount (₹)</div><div id="out_discountAmt"></div>
+
+          <div class="pt-2">Selling Rate</div><div id="out_sellingRate" class="font-medium pt-2"></div>
+
+          <div>Minus - OTA Commission (%)</div><div id="out_commPct"></div>
+          <div>Minus - OTA Commission (₹)</div><div id="out_commAmt"></div>
+
+          <div id="gstCommRowLabel">Minus - OTA Commission GST (₹)</div><div id="out_gstOnComm"></div>
+
+          <div>Minus - TDS on Selling Rate (₹)</div><div id="out_tdsAmt"></div>
+          <div>Minus - TCS on Selling Rate (₹)</div><div id="out_tcsAmt"></div>
+
+          <div class="pt-2">BALANCE (Net In-Hand)</div><div id="out_balance" class="font-bold pt-2"></div>
+
+          <div>Plus - GST on Selling Rate (5%)</div><div id="out_gstOnSelling"></div>
+
+          <div class="pt-2">Gross We Receive</div><div id="out_grossWeReceive" class="font-semibold pt-2"></div>
+
+          <div class="pt-2">We will pay to Government — GST on Selling Rate</div><div id="out_govtGst" class="pt-2"></div>
+
+          <div class="pt-2">In Hand</div><div id="out_inHand" class="font-bold pt-2"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="percentage-grid">
-    <div><label>Discount %</label><input id="discountPct" type="number" step="0.01" value="5"/></div>
-    <div><label>Commission %</label><input id="commissionPct" type="number" step="0.01" value="20"/></div>
-    <div><label>Commission GST %</label><input id="commissionGstPct" type="number" step="0.01" value="18"/></div>
-    <div><label>Service GST %</label><input id="serviceGstPct" type="number" step="0.01" value="5"/></div>
-    <div><label>TCS %</label><input id="tcsPct" type="number" step="0.01" value="0.5"/></div>
-    <div><label>TDS %</label><input id="tdsPct" type="number" step="0.01" value="0.1"/></div>
-  </div>
+  <script>
+    // OTA rules as per your latest table:
+    // Note: commission & tcs/tds are percentages (not fractions)
+    const otaRules = {
+      cleartrip: { commissionPct: 20, gstOnCommission: true, tcsPct: 0.5, tdsPct: 0.1, defaultDiscountPct: 10 },
+      gommt:     { commissionPct: 20, gstOnCommission: true, tcsPct: 0.5, tdsPct: 0.1, defaultDiscountPct: 10 },
+      yatra:     { commissionPct: 20, gstOnCommission: true, tcsPct: 0.5, tdsPct: 0.1, defaultDiscountPct: 10 },
 
- 
-  <div class="controls">
-    <button id="calcBtn">Calculate Required Gross Rates</button>
-    <button id="resetBtn" class="secondary">Reset</button>
-  </div>
+      // Per your spreadsheet "Agoda - Expedia" block uses 18% commission + TCS/TDS
+      expedia:   { commissionPct: 18, gstOnCommission: false, tcsPct: 0.5, tdsPct: 0.1, defaultDiscountPct: 10 },
+      agoda:     { commissionPct: 18, gstOnCommission: false, tcsPct: 0.5, tdsPct: 0.1, defaultDiscountPct: 10 },
 
-  <div class="output" id="output">
-    <div class="small">Enter your desired In-Hand amounts and click "Calculate Required Gross Rates" to see what Gross Rates you need to charge.</div>
-  </div>
-</div>
-
-<script>
-(function(){
-  const $ = id => document.getElementById(id);
-  const toNum = v => (v===''||v==null)?0:parseFloat(v);
-  function fmt(n){return Number.isFinite(n)?n.toFixed(2):'-'}
-
-  // Function to calculate from Gross to Net (for verification)
-  function calculateNetFromGross(grossRate, discountPct, commissionPct, commissionGstPct, serviceGstPct, tcsPct, tdsPct) {
-    if(grossRate<=0) return null;
-    
-    // Step 1: Apply discount
-    const Discount = grossRate * (discountPct / 100);
-    const DiscountedRate = grossRate - Discount;
-    
-    // Step 2: Calculate GST on discounted rate
-    const GstOnDiscountedRate = DiscountedRate * (serviceGstPct / 100);
-    
-    // Step 3: Total we receive
-    const TotalWeReceive = DiscountedRate + GstOnDiscountedRate;
-    
-    // Step 4: Calculate commission and GST on commission
-    const Commission = DiscountedRate * (commissionPct / 100);
-    const GstOnCommission = Commission * (commissionGstPct / 100);
-    
-    // Step 5: Calculate TCS and TDS
-    const TCS = DiscountedRate * (tcsPct / 100);
-    const TDS = DiscountedRate * (tdsPct / 100);
-    
-    // Step 6: Calculate net after deduction (in-hand)
-    const NetAfterDeduction = TotalWeReceive - Commission - GstOnCommission - TCS - TDS - GstOnDiscountedRate;
-    
-    return {
-      Gross: grossRate,
-      Discount,
-      DiscountedRate,
-      GstOnDiscountedRate,
-      TotalWeReceive,
-      Commission,
-      GstOnCommission,
-      TCS,
-      TDS,
-      NetAfterDeduction
+      // Booking.com block from your sheet: 15% commission, no TCS/TDS
+      booking:   { commissionPct: 15, gstOnCommission: false, tcsPct: 0.0, tdsPct: 0.0, defaultDiscountPct: 10 }
     };
-  }
 
-  // Function to calculate Gross from desired Net After Deduction
-  function calculateGrossFromNet(netAfterDeduction, discountPct, commissionPct, commissionGstPct, serviceGstPct, tcsPct, tdsPct) {
-    if(netAfterDeduction<=0) return null;
-    
-    // Convert percentages to decimals
-    const d = discountPct / 100;
-    const c = commissionPct / 100;
-    const cg = commissionGstPct / 100;
-    const sg = serviceGstPct / 100;
-    const tcs = tcsPct / 100;
-    const tds = tdsPct / 100;
-    
-    // We need to reverse the calculation:
-    // Net After Deduction = (Gross*(1-d) + Gross*(1-d)*sg) - Gross*(1-d)*c - Gross*(1-d)*c*cg - Gross*(1-d)*tcs - Gross*(1-d)*tds - Gross*(1-d)*sg
-    // Simplify: Net After Deduction = Gross*(1-d)*[1 + sg - c - c*cg - tcs - tds - sg]
-    // Further simplify: Net After Deduction = Gross*(1-d)*[1 - c - c*cg - tcs - tds]
-    
-    const factor = (1 - d) * (1 - c - c*cg - tcs - tds);
-    const Gross = netAfterDeduction / factor;
-    
-    // Now verify with forward calculation
-    const verification = calculateNetFromGross(Gross, discountPct, commissionPct, commissionGstPct, serviceGstPct, tcsPct, tdsPct);
-    
-    return {
-      ...verification,
-      TargetNetAfterDeduction: netAfterDeduction
-    };
-  }
+    // Fixed property GST on Selling Rate (from your sheet) = 5%
+    const PROPERTY_GST_PCT = 5;
 
-  function render(results){
-    if(results.length === 0 || results.every(r => !r.data)) {
-      $('output').innerHTML='<div class="small">Enter your desired In-Hand amounts and click "Calculate Required Gross Rates" to see what Gross Rates you need to charge.</div>';
-      return;
+    function setOTARules(){
+      const otaKey = document.getElementById('ota').value;
+      const rules = otaRules[otaKey];
+      if(!rules){
+        document.getElementById('rulesDisplay').innerText = '';
+        document.getElementById('discountInput').value = '';
+        return;
+      }
+
+      // Prefill discount
+      document.getElementById('discountInput').value = rules.defaultDiscountPct;
+
+      // Display rules summary
+      document.getElementById('rulesDisplay').innerHTML = 
+        `<strong>Commission:</strong> ${rules.commissionPct}% ${rules.gstOnCommission ? '+ 18% GST on commission' : ''} |
+         <strong>TCS:</strong> ${rules.tcsPct}% |
+         <strong>TDS:</strong> ${rules.tdsPct}% |
+         <strong>Property GST (fixed):</strong> ${PROPERTY_GST_PCT}%`;
+
+      // hide/show gst-on-commission label
+      document.getElementById('gstCommRowLabel').style.display = rules.gstOnCommission ? 'block' : 'none';
     }
-    
-    let html = '<table><thead><tr><th>Room Type</th><th class="right">Target In-Hand</th><th class="right">Required Gross</th><th class="right">Discounted Rate</th><th class="right">GST (' + $('serviceGstPct').value + '%)</th><th class="right">Total We Receive</th><th class="right">Commission</th><th class="right">GST on Commission</th><th class="right">TCS</th><th class="right">TDS</th><th class="right">Actual In-Hand</th></tr></thead><tbody>';
-    
-    for(const r of results){
-      if(!r.data) continue;
-      
-      // Check if calculated in-hand matches target (with small tolerance for floating point)
-      const inHandMatch = Math.abs(r.data.NetAfterDeduction - r.data.TargetNetAfterDeduction) < 0.01;
-      const inHandClass = inHandMatch ? '' : 'highlight';
-      
-      html += `<tr>
-        <td>${r.name}</td>
-        <td class="right highlight">₹${fmt(r.data.TargetNetAfterDeduction)}</td>
-        <td class="right highlight">₹${fmt(r.data.Gross)}</td>
-        <td class="right">₹${fmt(r.data.DiscountedRate)}</td>
-        <td class="right">₹${fmt(r.data.GstOnDiscountedRate)}</td>
-        <td class="right">₹${fmt(r.data.TotalWeReceive)}</td>
-        <td class="right">₹${fmt(r.data.Commission)}</td>
-        <td class="right">₹${fmt(r.data.GstOnCommission)}</td>
-        <td class="right">₹${fmt(r.data.TCS)}</td>
-        <td class="right">₹${fmt(r.data.TDS)}</td>
-        <td class="right ${inHandClass}">₹${fmt(r.data.NetAfterDeduction)}</td>
-      </tr>`;
+
+    // Helper formatter
+    function fmt(v){ 
+      if(isNaN(v)) return '₹0.0000';
+      // format with thousands and 4 decimals (matches your sample precision)
+      return '₹' + Number(v).toLocaleString('en-IN', {minimumFractionDigits:4, maximumFractionDigits:4});
     }
-    html += '</tbody></table>';
-    $('output').innerHTML = html;
-  }
 
-  $('calcBtn').addEventListener('click', e => {
-    e.preventDefault();
-    const discountPct = toNum($('discountPct').value);
-    const commissionPct = toNum($('commissionPct').value);
-    const commissionGstPct = toNum($('commissionGstPct').value);
-    const serviceGstPct = toNum($('serviceGstPct').value);
-    const tcsPct = toNum($('tcsPct').value);
-    const tdsPct = toNum($('tdsPct').value);
+    function calculateGrossRate(){
+      const otaKey = document.getElementById('ota').value;
+      const rules = otaRules[otaKey];
+      if(!rules){
+        alert('Please select an OTA');
+        return;
+      }
 
-    const rooms = [
-      {id:'inhand_db_nac', name:'Double Bed Non AC'},
-      {id:'inhand_db_ac', name:'Double Bed AC'},
-      {id:'inhand_tb_nac', name:'Triple Bed Non AC'},
-      {id:'inhand_tb_ac', name:'Triple Bed AC'},
-      {id:'inhand_fb_nac', name:'Four Bed Non AC'},
-      {id:'inhand_fb_ac', name:'Four Bed AC'},
-      {id:'inhand_extra', name:'Extra Mattress'}
-    ];
+      const netInHand = parseFloat(document.getElementById('netRate').value);
+      if(isNaN(netInHand) || netInHand <= 0){
+        alert('Enter valid Net In-Hand amount (e.g. 1000)');
+        return;
+      }
 
-    const results = rooms.map(r => ({
-      name: r.name,
-      data: calculateGrossFromNet(toNum($(r.id).value), discountPct, commissionPct, commissionGstPct, serviceGstPct, tcsPct, tdsPct)
-    }));
-    
-    render(results);
-  });
+      // Discount editable (use entered value or default)
+      let discountPct = parseFloat(document.getElementById('discountInput').value);
+      if(isNaN(discountPct)) discountPct = rules.defaultDiscountPct;
 
-  $('resetBtn').addEventListener('click', e => {
-    e.preventDefault();
-    ['inhand_db_nac','inhand_db_ac','inhand_tb_nac','inhand_tb_ac','inhand_fb_nac','inhand_fb_ac','inhand_extra'].forEach(id => $(id).value = '');
-    $('discountPct').value = 5;
-    $('commissionPct').value = 20;
-    $('commissionGstPct').value = 18;
-    $('serviceGstPct').value = 5;
-    $('tcsPct').value = 0.5;
-    $('tdsPct').value = 0.1;
-    $('output').innerHTML = '<div class="small">Enter your desired In-Hand amounts and click "Calculate Required Gross Rates" to see what Gross Rates you need to charge.</div>';
-  });
-  
-  // Add example calculation
-  document.addEventListener('DOMContentLoaded', function() {
-    $('inhand_db_nac').value = 1000;
-  });
-})();
-</script>
+      // percentages to fractions
+      const c = rules.commissionPct / 100;        // OTA commission on S
+      const gstOnC_rate = rules.gstOnCommission ? 0.18 : 0; // 18% on commission (if applies)
+      const tds = rules.tdsPct / 100;             // TDS on S
+      const tcs = rules.tcsPct / 100;             // TCS on S
+      const d = discountPct / 100;                // discount on base rate (BR)
+      const propGst = PROPERTY_GST_PCT / 100;     // GST on selling rate (hotel's GST, shown separately)
+
+      // Deduction factor on S that reduces S to Net In-Hand (deducted from S)
+      // netInHand = S - (S*c) - (S*c*gstOnC_rate) - (S*tds) - (S*tcs)
+      // => netInHand = S * (1 - (c + c*gstOnC_rate + tds + tcs))
+      const deductionOnS = c + (c * gstOnC_rate) + tds + tcs;
+      const keepFactor = 1 - deductionOnS;
+      if(keepFactor <= 0){
+        alert('Rates produce invalid factor (check commission/GST/TDS/TCS).');
+        return;
+      }
+
+      // Selling Rate S:
+      const S = netInHand / keepFactor;
+
+      // gross/base rate BR = S / (1 - d)
+      if(d >= 1){
+        alert('Discount must be less than 100%');
+        return;
+      }
+      const BR = S / (1 - d);
+
+      // Breakdown amounts
+      const discountAmt = BR * d;              // BR * discount%
+      const commissionAmt = S * c;             // S * commission%
+      const gstOnCommissionAmt = commissionAmt * gstOnC_rate; // if applies
+      const tdsAmt = S * tds;
+      const tcsAmt = S * tcs;
+      const balance = S - commissionAmt - gstOnCommissionAmt - tdsAmt - tcsAmt; // should be ~netInHand
+      const gstOnSelling = S * propGst;
+      const grossWeReceive = balance + gstOnSelling;
+
+      // write to UI (4 decimals)
+      document.getElementById('out_baseRate').innerText = fmt(BR);
+      document.getElementById('out_discountPct').innerText = (discountPct.toFixed(2) + ' %');
+      document.getElementById('out_discountAmt').innerText = fmt(discountAmt);
+
+      document.getElementById('out_sellingRate').innerText = fmt(S);
+
+      document.getElementById('out_commPct').innerText = (rules.commissionPct.toFixed(2) + ' %');
+      document.getElementById('out_commAmt').innerText = fmt(commissionAmt);
+
+      // GST on commission row (show 0 if not applicable)
+      if(rules.gstOnCommission){
+        document.getElementById('out_gstOnComm').innerText = fmt(gstOnCommissionAmt);
+        document.getElementById('gstCommRowLabel').style.display = 'block';
+      } else {
+        document.getElementById('out_gstOnComm').innerText = fmt(0);
+        document.getElementById('gstCommRowLabel').style.display = 'none';
+      }
+
+      document.getElementById('out_tdsAmt').innerText = fmt(tdsAmt);
+      document.getElementById('out_tcsAmt').innerText = fmt(tcsAmt);
+
+      document.getElementById('out_balance').innerText = fmt(balance);
+      document.getElementById('out_gstOnSelling').innerText = fmt(gstOnSelling);
+      document.getElementById('out_grossWeReceive').innerText = fmt(grossWeReceive);
+
+      document.getElementById('out_govtGst').innerText = fmt(gstOnSelling);
+      document.getElementById('out_inHand').innerText = fmt(balance);
+
+      // show result block
+      document.getElementById('resultWrap').classList.remove('hidden');
+      // scroll into view on small screens
+      document.getElementById('resultWrap').scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  </script>
 </body>
 </html>
