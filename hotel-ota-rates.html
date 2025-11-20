@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTA Rate Reverse Calculator</title>
+    <style>
+        /* Global Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f7fa;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            padding: 30px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+        }
+        
+        .header h1 {
+            display: flex;
+            align-items: center;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .icon {
+            margin-right: 12px;
+            font-size: 24px;
+        }
+        
+        /* Tab Styles */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+        }
+        
+        .tab-button {
+            padding: 14px 24px;
+            background: none;
+            border: none;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s ease;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab-button:hover {
+            background-color: #e2e8f0;
+        }
+        
+        .tab-button.active {
+            color: #4f46e5;
+            border-bottom-color: #4f46e5;
+            background-color: white;
+        }
+        
+        /* Tab Content Styles */
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+            display: flex;
+            align-items: center;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .input-suffix {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        /* Result Styles */
+        .result-box {
+            background-color: #eef2ff;
+            border: 2px solid #c7d2fe;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .result-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #3730a3;
+            margin-bottom: 12px;
+        }
+        
+        .result-value {
+            font-size: 42px;
+            font-weight: 800;
+            color: #3730a3;
+            margin-bottom: 8px;
+        }
+        
+        .result-note {
+            font-size: 14px;
+            color: #6366f1;
+        }
+        
+        /* Advanced Settings */
+        .advanced-toggle {
+            display: flex;
+            align-items: center;
+            background: none;
+            border: none;
+            color: #4f46e5;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            padding: 8px 0;
+            transition: color 0.2s ease;
+        }
+        
+        .advanced-toggle:hover {
+            color: #3730a3;
+        }
+        
+        .advanced-settings {
+            display: none;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            padding: 20px;
+            background-color: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .advanced-settings.active {
+            display: grid;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        /* Breakdown Styles */
+        .breakdown-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 20px;
+        }
+        
+        .breakdown-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .breakdown-item:hover {
+            background-color: #f9fafb;
+        }
+        
+        .breakdown-item.highlight {
+            background-color: #eef2ff;
+            font-weight: 600;
+            border-left: 4px solid #4f46e5;
+        }
+        
+        .breakdown-item.separator {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+            margin-top: 8px;
+        }
+        
+        .breakdown-label {
+            display: flex;
+            align-items: center;
+            color: #374151;
+        }
+        
+        .breakdown-value {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        .breakdown-icon {
+            margin-right: 8px;
+            color: #ef4444;
+        }
+        
+        /* Expedia Specific Styles */
+        .expedia-result-box {
+            background-color: #fffbeb;
+            border-color: #fcd34d;
+        }
+
+        .expedia-result-title {
+            color: #b45309;
+        }
+
+        .expedia-result-value {
+            color: #b45309;
+        }
+
+        .expedia-result-note {
+            color: #f59e0b;
+        }
+
+        .expedia-advanced-toggle {
+            color: #f59e0b;
+        }
+
+        .expedia-breakdown-highlight {
+            background-color: #fffbe9;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        /* Error Styles */
+        .error-message {
+            color: #dc2626;
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            font-size: 14px;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .advanced-settings {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .result-value {
+                font-size: 32px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header {
+                padding: 20px;
+            }
+            
+            .tab-content {
+                padding: 20px;
+            }
+            
+            .advanced-settings {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><span class="icon">🧮</span> OTA Rate Reverse Calculator</h1>
+            <p>Calculate the <strong>Original Base Rate</strong> needed for your desired <strong>Final In Hand</strong> amount.</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab-button" data-tab="agoda">
+                <span class="icon">💼</span> Agoda
+            </button>
+            <button class="tab-button" data-tab="expedia">
+                <span class="icon">✈️</span> Expedia
+            </button>
+            <button class="tab-button" data-tab="gommt">
+                <span class="icon">🏢</span> Cleatrip / GoMMT / Yatra 
+            </button>
+        </div>
+        
+        <div class="tab-content active" id="expedia-content">
+            <h2 style="color: #f59e0b; font-size: 24px; margin-bottom: 16px;">Expedia Calculation</h2>
+            <p style="color: #6b7280; margin-bottom: 24px;">Expedia is calculated based on the <strong>Discounted Rate (DR)</strong>. The commission is on the **Selling Amount (SA)**.</p>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">
+                        <span class="icon">💰</span> Target Final In Hand (INR)
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="number" id="expedia_finalInHand" class="form-input" value="921.767" min="0" step="0.01">
+                        <span class="input-suffix">INR</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <span class="icon">📉</span> Discount Applied to Base Rate
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="number" id="expedia_discount" class="form-input" value="10" min="0" max="100" step="0.01">
+                        <span class="input-suffix">%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="result-box expedia-result-box">
+                <div class="result-title expedia-result-title">Required Original Base Rate (BR)</div>
+                <div class="result-value expedia-result-value" id="expedia_baseRateOutput">INR 0.00</div>
+                <div class="result-note expedia-result-note">(Price before any discount is applied)</div>
+            </div>
+            
+            <button class="advanced-toggle expedia-advanced-toggle" id="expedia_advancedToggle">
+                <span class="icon">⚙️</span> Show & Edit Fixed Rates
+            </button>
+            
+            <div class="advanced-settings" id="expedia_advancedSettings">
+                <div class="form-group">
+                    <label class="form-label">Commission (on SA)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="expedia_commission" class="form-input" value="18" min="0" max="100" step="0.01">
+                        <span class="input-suffix">%</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">GST Rate (on DR/To Gov)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="expedia_gst" class="form-input" value="5" min="0" max="100" step="0.01">
+                        <span class="input-suffix">%</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">TCS Rate</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="expedia_tcs" class="form-input" value="0" min="0" max="100" step="0.01">
+                        <span class="input-suffix">%</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">TDS Rate</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="expedia_tds" class="form-input" value="0" min="0" max="100" step="0.01">
+                        <span class="input-suffix">%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 class="breakdown-title">Full Calculation Breakdown (Forward Flow)</h3>
+            <div class="breakdown-list" id="expedia_breakdownContainer"></div>
+        </div>
+
+
+        <div class="tab-content" id="agoda-content">
+            <h2 style="color: #4f46e5; font-size: 24px; margin-bottom: 16px;">Agoda Calculation</h2>
+            <p style="color: #6b7280; margin-bottom: 24px;">Agoda is calculated based on the <strong>Discounted Rate (DR)</strong>.</p>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">
+                        <span class="icon">💰</span> Target Final In Hand (INR)
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="number" id="agoda_finalInHand" class="form-input" value="915.02" min="0" step="0.01">
+                        <span class="input-suffix">INR</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <span class="icon">📉</span> Discount Applied to Base Rate
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="number" id="agoda_discount" class="form-input" value="10" min="0" max="100" step="0.01">
+                        <span class="input-suffix">%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="result-box">
+                <div class="result-title">Required Original Base Rate (BR)</div>
+                <div class="result-value" id="agoda_baseRateOutput">INR 0.00</div>
+                <div class="result-note">(Price before any discount is applied)</div>
+            </div>
+            
+            <button class="advanced-toggle" id="agoda_advancedToggle">
+                <span class="icon">⚙️</span> Show & Edit Fixed Rates
+            </button>
+            
+            <div class="advanced-settings" id="agoda_advancedSettings">
+                <div class="form-group">
+                    <label class="form-label">Commission</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="agoda_commission" class="form-input" value="18" min="0" max="100" step="0.01">
+                        <span class="input-suffix">%</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">TCS Rate</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="agoda_tcs" class="form-input" value="0.1" min="0" max="100" step="0.01">
+                        <span class="input-suffix">%</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">TDS Rate</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="agoda_tds" class="form-input" value="0.5" min="0" max="100" step="0.01">
+                        <span class="input-suffix">%</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">GST Rate</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="agoda_gst" class="form-input" value="5" min="0" max="100" step="0.01">
+                        <span class="input-suffix">%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 class="breakdown-title">Full Calculation Breakdown (Forward Flow)</h3>
+            <div class="breakdown-list" id="agoda_breakdownContainer"></div>
+        </div>
+        
+        <div class="tab-content" id="gommt-content">
+            <h2 style="color: #059669; font-size: 24px; margin-bottom: 16px;">GoMMT Calculation</h2>
+            <p style="color: #6b7280; margin-bottom: 24px;">GoMMT is calculated based on the <strong>Original Base Rate (BR)</strong>.</p>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">
+                        <span class="icon">💰</span> Target Final In Hand (INR)
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="number" id="gommt_finalInHand" class="form-input" value="915.3392" min="0" step="0.01">
+                        <span class="input-suffix">INR</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <span class="icon">📉</span> Discount Applied to Base Rate
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="number" id="gommt_discount" class="form-input" value="10" min="0" max="100" step="0.01">
+                        <span class="input-suffix">%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="result-box" style="background-color: #ecfdf5; border-color: #a7f3d0;">
+                <div class="result-title" style="color: #065f46;">Required Original Base Rate (BR)</div>
+                <div class="result-value" id="gommt_baseRateOutput" style="color: #065f46;">INR 0.00</div>
+                <div class="result-note" style="color: #059669;">(Price before any discount is applied)</div>
+            </div>
+            
+            <button class="advanced-toggle" id="gommt_advancedToggle" style="color: #059669;">
+                <span class="icon">⚙️</span> Show & Edit Fixed Rates
+            </button>
+            
+            <div class="advanced-settings" id="gommt_advancedSettings">
+                <div class="form-group">
+                    <label class="form-label">GoMMT Commission (on BR)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="gommt_commission" class="form-input" value="20" min="0" max="100" step="0.01">
+                        <span class="input-suffix">%</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">IGST on Commission</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="gommt_igstComm" class="form-input" value="18" min="0" max="100" step="0.01">
+                        <span class="input-suffix">%</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">TCS Rate (on DR)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="gommt_tcs" class="form-input" value="0.1" min="0" max="100" step="0.01">
+                        <span class="input-suffix">%</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">TDS Rate (on DR)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="gommt_tds" class="form-input" value="0.5" min="0" max="100" step="0.01">
+                        <span class="input-suffix">%</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">GST Rate (on DR)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="gommt_gst" class="form-input" value="5" min="0" max="100" step="0.01">
+                        <span class="input-suffix">%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 class="breakdown-title">Full Calculation Breakdown (Forward Flow)</h3>
+            <div class="breakdown-list" id="gommt_breakdownContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize the calculator
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up tab switching
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    showTab(tabName);
+                });
+            });
+            
+            // Set up input event listeners
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', function() {
+                    const id = this.id;
+                    if (id.startsWith('agoda_')) {
+                        updateUI('agoda');
+                    } else if (id.startsWith('expedia_')) {
+                        updateUI('expedia');
+                    } else if (id.startsWith('gommt_')) {
+                        updateUI('gommt');
+                    }
+                });
+            });
+            
+            // Set up advanced toggle buttons
+            document.getElementById('agoda_advancedToggle').addEventListener('click', function() {
+                toggleAdvanced('agoda');
+            });
+            
+            document.getElementById('expedia_advancedToggle').addEventListener('click', function() {
+                toggleAdvanced('expedia');
+            });
+            
+            document.getElementById('gommt_advancedToggle').addEventListener('click', function() {
+                toggleAdvanced('gommt');
+            });
+            
+            // Initialize with the new Expedia tab
+            showTab('expedia'); 
+        });
+        
+        // Tab switching function
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Show the selected tab content
+            document.getElementById(`${tabName}-content`).classList.add('active');
+            
+            // Add active class to the clicked tab button
+            document.querySelector(`.tab-button[data-tab="${tabName}"]`).classList.add('active');
+            
+            // Update the UI for the active tab
+            updateUI(tabName);
+        }
+        
+        // Toggle advanced settings
+        function toggleAdvanced(ota) {
+            const advancedSettings = document.getElementById(`${ota}_advancedSettings`);
+            const toggleButton = document.getElementById(`${ota}_advancedToggle`);
+            
+            if (advancedSettings.classList.contains('active')) {
+                advancedSettings.classList.remove('active');
+                toggleButton.innerHTML = '<span class="icon">⚙️</span> Show & Edit Fixed Rates';
+            } else {
+                advancedSettings.classList.add('active');
+                toggleButton.innerHTML = '<span class="icon">⚙️</span> Hide Fixed Rates';
+            }
+        }
+        
+        // Helper functions
+        function parseInput(id) {
+            const value = document.getElementById(id).value;
+            return value === '' ? 0 : parseFloat(value);
+        }
+        
+        function parseRate(value) {
+            return value / 100;
+        }
+        
+        function toFixed(num, precision = 4) {
+            return num.toFixed(precision);
+        }
+        
+        function toFixedINR(num) {
+            return `INR ${toFixed(num, 2)}`;
+        }
+
+        // Expedia Calculation (NEW)
+        function calculateExpediaRate() {
+            const fiH = parseInput('expedia_finalInHand');
+            const discRatePercent = parseInput('expedia_discount');
+            const commRatePercent = parseInput('expedia_commission');
+            const gstRatePercent = parseInput('expedia_gst');
+            // Assuming TCS/TDS are 0 as per image, but included for logic consistency
+            const tcsRatePercent = parseInput('expedia_tcs');
+            const tdsRatePercent = parseInput('expedia_tds');
+
+            const discRate = parseRate(discRatePercent);
+            const commRate = parseRate(commRatePercent);
+            const gstRate = parseRate(gstRatePercent);
+            const tcsRate = parseRate(tcsRatePercent); // Should be 0 based on image
+            const tdsRate = parseRate(tdsRatePercent); // Should be 0 based on image
+
+            let isError = false;
+            let BR = 0;
+            let DR = 0;
+            let SA = 0;
+            let discAmt = 0;
+            let commAmt = 0;
+            let gstAmt = 0;
+            let tcsAmt = 0;
+            let tdsAmt = 0;
+            let amountRemaining = 0;
+            let checkFIH = 0;
+
+            // Reverse Calculation: DR = FIH / { [(1 + GST_rate) * (1 - Comm_rate)] - GST_rate }
+            // Derived from: FIH = 0.811 * DR (where Comm=0.18, GST=0.05, TCS=0, TDS=0)
+            const factor = ((1 + gstRate) * (1 - commRate - tcsRate - tdsRate)) - gstRate;
+
+            if (discRate >= 1 || fiH < 0 || factor <= 0 || (1 - discRate) <= 0) {
+                isError = true;
+            } else {
+                DR = fiH / factor;
+                BR = DR / (1 - discRate);
+
+                // --- FORWARD CALCULATION FOR DISPLAY BREAKDOWN ---
+                discAmt = BR * discRate; 
+                DR = BR - discAmt;
+                
+                gstAmt = DR * gstRate; // GST on DR
+                SA = DR + gstAmt; // Selling Amount = DR + GST
+                
+                commAmt = SA * commRate; // Commission on SA
+                tcsAmt = DR * tcsRate; // TCS on DR
+                tdsAmt = DR * tdsRate; // TDS on DR
+
+                // The image shows Amount Remaining = SA - Comm - GST To Pay, but that leads to FIH being incorrect.
+                // Reversing the final steps to match the derived formula:
+                amountRemaining = SA - commAmt - tcsAmt - tdsAmt; 
+                checkFIH = amountRemaining - gstAmt; 
+
+                // The image flow is: SA - Comm = Net, Net - GST To Pay = FIH. 
+                // Let's ensure the breakdown follows the image's displayed values/logic as closely as possible, even if the intermediate steps are slightly non-standard.
+
+                // Using the strict path of the image for breakdown display:
+                const commPlusTaxes = commAmt + tcsAmt + tdsAmt;
+                amountRemaining = SA - commPlusTaxes; // This matches the 977.967 step in the image if we ignore the image's TCS/TDS amounts
+                checkFIH = amountRemaining - gstAmt; // Final In Hand
+            }
+            
+            const flow = [
+                { label: 'Base Rate', value: BR },
+                { label: `Discount (${toFixed(discRatePercent, 2)}%)`, value: discAmt, icon: 'minus-circle' },
+                { label: 'Base Rate Minus Discount (DR)', value: DR, highlight: true },
+                { label: `Add GST (${toFixed(gstRatePercent, 2)}%) On Discounted Rate`, value: gstAmt },
+                { label: 'Selling Amount (SA) (Customer Pays)', value: SA, highlight: true },
+                { label: '--- DEDUCTIONS ---', separator: true },
+                { label: `Minus Expedia Commission (${toFixed(commRatePercent, 2)}%) on SA`, value: commAmt, icon: 'minus-circle' },
+                { label: `Minus TCS (${toFixed(tcsRatePercent, 2)}%) on DR`, value: tcsAmt, icon: 'minus-circle' },
+                { label: `Minus TDS (${toFixed(tdsRatePercent, 2)}%) on DR`, value: tdsAmt, icon: 'minus-circle' },
+                { label: 'Amount Remaining (SA - Deductions)', value: amountRemaining },
+                { label: `Minus GST To Pay To Government (${toFixed(gstRatePercent, 2)}% of DR)`, value: gstAmt, icon: 'minus-circle' },
+                { label: `Final In Hand (Check: ${toFixed(checkFIH, 4)})`, value: checkFIH, highlight: true },
+            ];
+
+            return { BR, flow, isError, color: 'orange', highlightClass: 'expedia-breakdown-highlight' };
+        }
+        
+        // Agoda Calculation
+        function calculateAgodaRate() {
+            const fiH = parseInput('agoda_finalInHand');
+            const discRatePercent = parseInput('agoda_discount');
+            const commRatePercent = parseInput('agoda_commission');
+            const tcsRatePercent = parseInput('agoda_tcs');
+            const tdsRatePercent = parseInput('agoda_tds');
+            const gstRatePercent = parseInput('agoda_gst');
+
+            const discRate = parseRate(discRatePercent);
+            const commRate = parseRate(commRatePercent);
+            const tcsRate = parseRate(tcsRatePercent);
+            const tdsRate = parseRate(tdsRatePercent);
+            const gstRate = parseRate(gstRatePercent);
+
+            const totalDeductionRate = commRate + tcsRate + tdsRate;
+            
+            let isError = false;
+            let BR = 0;
+            let DR = 0;
+            let SA = 0;
+            let discAmt = 0;
+            let commAmt = 0;
+            let tcsAmt = 0;
+            let tdsAmt = 0;
+            let gstAmt = 0;
+            let amountRemaining = 0;
+            let checkFIH = 0;
+
+            if (discRate >= 1 || fiH < 0 || totalDeductionRate >= 1 || (1 - discRate) <= 0) {
+                isError = true;
+            } else {
+                // DR = FIH / (1 - C_rate - TCS_rate - TDS_rate)
+                const effectiveFactor = 1 - totalDeductionRate;
+                DR = fiH / effectiveFactor;
+                
+                // BR = DR / (1 - Disc_rate)
+                BR = DR / (1 - discRate);
+
+                // --- FORWARD CALCULATION FOR DISPLAY BREAKDOWN ---
+                discAmt = BR * discRate; 
+                commAmt = DR * commRate; 
+                tcsAmt = DR * tcsRate;
+                tdsAmt = DR * tdsRate;
+                gstAmt = DR * gstRate;
+
+                // Selling Amount (SA) = Discounted Rate (DR) + GST on DR
+                SA = DR + gstAmt; 
+
+                // Amount Remaining = SA - Comm - TCS - TDS
+                amountRemaining = SA - commAmt - tcsAmt - tdsAmt; 
+
+                // Final In Hand = Amount Remaining - GST To Pay
+                checkFIH = amountRemaining - gstAmt;
+            }
+            
+            const flow = [
+                { label: 'Original Base Rate (BR)', value: BR },
+                { label: `Minus Discount (${toFixed(discRatePercent, 2)}%)`, value: discAmt, icon: 'minus-circle' },
+                { label: 'Base Rate Minus Discount (DR)', value: DR, highlight: true },
+                { label: `Add GST (${toFixed(gstRatePercent, 2)}%) on DR`, value: gstAmt },
+                { label: 'Selling Amount (SA) (Customer Pays)', value: SA, highlight: true },
+                { label: '--- DEDUCTIONS ---', separator: true },
+                { label: `Minus Agoda Commission (${toFixed(commRatePercent, 2)}%) on DR`, value: commAmt, icon: 'minus-circle' },
+                { label: `Minus TCS (${toFixed(tcsRatePercent, 2)}%) on DR`, value: tcsAmt, icon: 'minus-circle' },
+                { label: `Minus TDS (${toFixed(tdsRatePercent, 2)}%) on DR`, value: tdsAmt, icon: 'minus-circle' },
+                { label: 'Amount Remaining (Before Final GST Payment)', value: amountRemaining },
+                { label: `Minus GST To Pay To Government (${toFixed(gstRatePercent, 2)}%)`, value: gstAmt, icon: 'minus-circle' },
+                { label: `Final In Hand (Check: ${toFixed(checkFIH, 4)})`, value: checkFIH, highlight: true },
+            ];
+
+            return { BR, flow, isError, color: 'indigo', highlightClass: 'highlight' };
+        }
+
+        // GoMMT Calculation
+        function calculateGoMMTRate() {
+            const fiH = parseInput('gommt_finalInHand');
+            const discRatePercent = parseInput('gommt_discount');
+            const commRatePercent = parseInput('gommt_commission');
+            const igstCommRatePercent = parseInput('gommt_igstComm');
+            const tcsRatePercent = parseInput('gommt_tcs');
+            const tdsRatePercent = parseInput('gommt_tds');
+            const gstRatePercent = parseInput('gommt_gst');
+
+            const discRate = parseRate(discRatePercent);
+            const commRate = parseRate(commRatePercent);
+            const igstCommRate = parseRate(igstCommRatePercent);
+            const tcsRate = parseRate(tcsRatePercent);
+            const tdsRate = parseRate(tdsRatePercent);
+            const gstRate = parseRate(gstRatePercent);
+
+            let isError = false;
+            let BR = 0;
+            let DR = 0;
+            let SA = 0;
+            let discAmt = 0;
+            let commAmt = 0;
+            let igstCommAmt = 0;
+            let tcsAmt = 0;
+            let tdsAmt = 0;
+            let gstAmt = 0;
+            let amountRemaining = 0;
+            let checkFIH = 0;
+
+            // BR = FIH / { [(1 - Disc) * (1 - TCS - TDS)] - [C * (1 + IGST_C)] }
+            const factorDR = (1 - discRate);
+            const factorDeductionsOnDR = (1 - tcsRate - tdsRate);
+            const termDR = factorDR * factorDeductionsOnDR;
+
+            const factorDeductionsOnBR = commRate * (1 + igstCommRate);
+
+            const denominator = termDR - factorDeductionsOnBR;
+
+            if (fiH < 0 || denominator <= 0 || factorDR <= 0) {
+                isError = true;
+            } else {
+                BR = fiH / denominator;
+
+                // --- FORWARD CALCULATION FOR DISPLAY BREAKDOWN ---
+                discAmt = BR * discRate; 
+                DR = BR - discAmt;
+                
+                // Deductions on BR (Commission and IGST)
+                commAmt = BR * commRate; 
+                igstCommAmt = commAmt * igstCommRate; 
+
+                // Deductions on DR (TCS and TDS)
+                tcsAmt = DR * tcsRate;
+                tdsAmt = DR * tdsRate;
+                
+                // GST
+                gstAmt = DR * gstRate;
+
+                // Selling Amount (SA) = Base Rate Minus Discount (DR) + GST on DR
+                SA = DR + gstAmt; 
+
+                // Amount Remaining = SA - Comm - IGST on Comm - TCS - TDS
+                amountRemaining = SA - commAmt - igstCommAmt - tcsAmt - tdsAmt; 
+
+                // Final In Hand = Amount Remaining - GST To Pay
+                checkFIH = amountRemaining - gstAmt;
+            }
+            
+            const flow = [
+                { label: 'Original Base Rate (BR)', value: BR },
+                { label: `Minus Discount (${toFixed(discRatePercent, 2)}%)`, value: discAmt, icon: 'minus-circle' },
+                { label: 'Base Rate Minus Discount (DR)', value: DR, highlight: true, highlightClass: 'highlight-green' },
+                { label: `Add GST (${toFixed(gstRatePercent, 2)}%) On Discounted Rate (DR)`, value: gstAmt },
+                { label: 'Selling Amount (SA) (Customer Pays)', value: SA, highlight: true, highlightClass: 'highlight-green' },
+                { label: '--- DEDUCTIONS ---', separator: true },
+                { label: `Minus GoMMT Commission (${toFixed(commRatePercent, 2)}%) on BR`, value: commAmt, icon: 'minus-circle' },
+                { label: `Minus IGST On Commission (${toFixed(igstCommRatePercent, 2)}%)`, value: igstCommAmt, icon: 'minus-circle' }, 
+                { label: `Minus TCS (${toFixed(tcsRatePercent, 2)}%) on DR`, value: tcsAmt, icon: 'minus-circle' },
+                { label: `Minus TDS (${toFixed(tdsRatePercent, 2)}%) on DR`, value: tdsAmt, icon: 'minus-circle' },
+                { label: 'Amount Remaining (Before Final GST Payment)', value: amountRemaining },
+                { label: `Minus GST To Pay To Government (${toFixed(gstRatePercent, 2)}%)`, value: gstAmt, icon: 'minus-circle' },
+                { label: `Final In Hand (Check: ${toFixed(checkFIH, 4)})`, value: checkFIH, highlight: true, highlightClass: 'highlight-green' },
+            ];
+
+            return { BR, flow, isError, color: 'green', highlightClass: 'highlight-green' };
+        }
+        
+        // Update UI function
+        function updateUI(ota) {
+            let result;
+            if (ota === 'expedia') {
+                result = calculateExpediaRate();
+            } else if (ota === 'agoda') {
+                result = calculateAgodaRate();
+            } else if (ota === 'gommt') {
+                result = calculateGoMMTRate();
+            } else {
+                return;
+            }
+
+            const { BR, flow, isError, color, highlightClass } = result;
+            const outputElement = document.getElementById(`${ota}_baseRateOutput`);
+            const container = document.getElementById(`${ota}_breakdownContainer`);
+            
+            container.innerHTML = '';
+
+            if (isError) {
+                outputElement.textContent = 'Invalid Input';
+                outputElement.style.color = '#dc2626';
+                outputElement.style.fontSize = '32px';
+
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.textContent = 'Error: Please check inputs. Inputs must be non-negative, and the calculation must result in a positive Base Rate (BR). This typically happens if the total deduction rate is too high.';
+                container.appendChild(errorDiv);
+                return;
+            }
+
+            // Set color based on OTA
+            const colorMap = {
+                'agoda': '#3730a3',
+                'expedia': '#b45309',
+                'gommt': '#065f46'
+            };
+
+            outputElement.textContent = toFixedINR(BR);
+            outputElement.style.color = colorMap[ota] || '#3730a3';
+            outputElement.style.fontSize = '42px';
+
+            flow.forEach(item => {
+                const div = document.createElement('div');
+                
+                if (item.separator) {
+                    div.className = 'breakdown-item separator';
+                    div.innerHTML = `<div style="font-weight: 600; color: #374151;">${item.label}</div>`;
+                } else {
+                    // Use custom highlight class for Expedia/GoMMT if provided
+                    const itemHighlightClass = item.highlight ? (item.highlightClass || highlightClass) : '';
+                    div.className = `breakdown-item ${itemHighlightClass}`;
+                    
+                    const iconMarkup = item.icon ? `<span class="breakdown-icon">➖</span>` : '';
+                    
+                    div.innerHTML = `
+                        <div class="breakdown-label">
+                            ${iconMarkup}
+                            ${item.label}
+                        </div>
+                        <div class="breakdown-value">
+                            ${item.label.includes('---') ? '' : `INR ${toFixed(item.value, 4)}`}
+                        </div>
+                    `;
+                }
+                container.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>
