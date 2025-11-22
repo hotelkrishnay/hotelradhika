@@ -507,9 +507,7 @@
         
         <div class="tab-content" id="gommt-content">
             <h2 style="color: #059669; font-size: 24px; margin-bottom: 16px;">GoMMT Calculation</h2>
-            <p style="color: #6b7280; margin-bottom: 24px;">GoMMT is calculated based on the <strong>Original Base Rate (BR)</strong>.</p>
-            
-            <div class="form-row">
+            <p style="color: #6b7280; margin-bottom: 24px;">GoMMT is calculated based on the <strong>Discounted Rate (DR)</strong>. The commission is on the **Discounted Rate (DR)**.</p> <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">
                         <span class="icon">💰</span> Target Final In Hand (INR)
@@ -543,8 +541,7 @@
             
             <div class="advanced-settings" id="gommt_advancedSettings">
                 <div class="form-group">
-                    <label class="form-label">GoMMT Commission (on BR)</label>
-                    <div class="input-wrapper">
+                    <label class="form-label">GoMMT Commission (on DR)</label> <div class="input-wrapper">
                         <input type="number" id="gommt_commission" class="form-input" value="20" min="0" max="100" step="0.01">
                         <span class="input-suffix">%</span>
                     </div>
@@ -714,7 +711,6 @@
             let checkFIH = 0;
 
             // Reverse Calculation: DR = FIH / { [(1 + GST_rate) * (1 - Comm_rate)] - GST_rate }
-            // Derived from: FIH = 0.811 * DR (where Comm=0.18, GST=0.05, TCS=0, TDS=0)
             const factor = ((1 + gstRate) * (1 - commRate - tcsRate - tdsRate)) - gstRate;
 
             if (discRate >= 1 || fiH < 0 || factor <= 0 || (1 - discRate) <= 0) {
@@ -734,18 +730,10 @@
                 tcsAmt = DR * tcsRate; // TCS on DR
                 tdsAmt = DR * tdsRate; // TDS on DR
 
-                // The image shows Amount Remaining = SA - Comm - GST To Pay, but that leads to FIH being incorrect.
-                // Reversing the final steps to match the derived formula:
-                amountRemaining = SA - commAmt - tcsAmt - tdsAmt; 
-                checkFIH = amountRemaining - gstAmt; 
-
-                // The image flow is: SA - Comm = Net, Net - GST To Pay = FIH. 
-                // Let's ensure the breakdown follows the image's displayed values/logic as closely as possible, even if the intermediate steps are slightly non-standard.
-
                 // Using the strict path of the image for breakdown display:
                 const commPlusTaxes = commAmt + tcsAmt + tdsAmt;
-                amountRemaining = SA - commPlusTaxes; // This matches the 977.967 step in the image if we ignore the image's TCS/TDS amounts
-                checkFIH = amountRemaining - gstAmt; // Final In Hand
+                amountRemaining = SA - commPlusTaxes; 
+                checkFIH = amountRemaining - gstAmt; 
             }
             
             const flow = [
@@ -840,7 +828,7 @@
             return { BR, flow, isError, color: 'indigo', highlightClass: 'highlight' };
         }
 
-        // GoMMT Calculation
+        // GoMMT Calculation (CORRECTED to use Commission on Discounted Rate - DR)
         function calculateGoMMTRate() {
             const fiH = parseInput('gommt_finalInHand');
             const discRatePercent = parseInput('gommt_discount');
@@ -870,16 +858,17 @@
             let amountRemaining = 0;
             let checkFIH = 0;
 
-            // BR = FIH / { [(1 - Disc) * (1 - TCS - TDS)] - [C * (1 + IGST_C)] }
-            const factorDR = (1 - discRate);
-            const factorDeductionsOnDR = (1 - tcsRate - tdsRate);
-            const termDR = factorDR * factorDeductionsOnDR;
+            // --- REVERSE CALCULATION: Commission on DR ---
+            
+            // Total deduction rate on DR
+            // Factor_DR = 1 - [Comm_R * (1 + IGST_Comm_R)] - TCS_R - TDS_R
+            const commDeductionRate = commRate * (1 + igstCommRate);
+            const factorDR = 1.0 - commDeductionRate - tcsRate - tdsRate;
 
-            const factorDeductionsOnBR = commRate * (1 + igstCommRate);
+            // Denominator for BR is Factor_DR * (1 - Disc_R)
+            const denominator = factorDR * (1 - discRate);
 
-            const denominator = termDR - factorDeductionsOnBR;
-
-            if (fiH < 0 || denominator <= 0 || factorDR <= 0) {
+            if (fiH < 0 || denominator <= 0 || (1 - discRate) <= 0) {
                 isError = true;
             } else {
                 BR = fiH / denominator;
@@ -888,27 +877,26 @@
                 discAmt = BR * discRate; 
                 DR = BR - discAmt;
                 
-                // Deductions on BR (Commission and IGST)
-                commAmt = BR * commRate; 
+                // Deductions on DR
+                commAmt = DR * commRate; 
                 igstCommAmt = commAmt * igstCommRate; 
-
-                // Deductions on DR (TCS and TDS)
                 tcsAmt = DR * tcsRate;
                 tdsAmt = DR * tdsRate;
                 
-                // GST
+                // GST (on DR)
                 gstAmt = DR * gstRate;
 
-                // Selling Amount (SA) = Base Rate Minus Discount (DR) + GST on DR
+                // Selling Amount (SA) = Discounted Rate (DR) + GST on DR
                 SA = DR + gstAmt; 
 
-                // Amount Remaining = SA - Comm - IGST on Comm - TCS - TDS
+                // Amount Remaining = SA - (Comm + IGST on Comm) - TCS - TDS
                 amountRemaining = SA - commAmt - igstCommAmt - tcsAmt - tdsAmt; 
 
                 // Final In Hand = Amount Remaining - GST To Pay
                 checkFIH = amountRemaining - gstAmt;
             }
             
+            // Updated flow labels to reflect 'Commission on DR'
             const flow = [
                 { label: 'Original Base Rate (BR)', value: BR },
                 { label: `Minus Discount (${toFixed(discRatePercent, 2)}%)`, value: discAmt, icon: 'minus-circle' },
@@ -916,7 +904,7 @@
                 { label: `Add GST (${toFixed(gstRatePercent, 2)}%) On Discounted Rate (DR)`, value: gstAmt },
                 { label: 'Selling Amount (SA) (Customer Pays)', value: SA, highlight: true, highlightClass: 'highlight-green' },
                 { label: '--- DEDUCTIONS ---', separator: true },
-                { label: `Minus GoMMT Commission (${toFixed(commRatePercent, 2)}%) on BR`, value: commAmt, icon: 'minus-circle' },
+                { label: `Minus GoMMT Commission (${toFixed(commRatePercent, 2)}%) on DR`, value: commAmt, icon: 'minus-circle' }, // CORRECTED TEXT
                 { label: `Minus IGST On Commission (${toFixed(igstCommRatePercent, 2)}%)`, value: igstCommAmt, icon: 'minus-circle' }, 
                 { label: `Minus TCS (${toFixed(tcsRatePercent, 2)}%) on DR`, value: tcsAmt, icon: 'minus-circle' },
                 { label: `Minus TDS (${toFixed(tdsRatePercent, 2)}%) on DR`, value: tdsAmt, icon: 'minus-circle' },
